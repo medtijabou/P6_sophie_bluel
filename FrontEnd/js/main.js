@@ -339,8 +339,7 @@ async function deleteWork(workId) {
 
 
 
-
-
+// Soumission du formulaire
 async function handleFormSubmit() {
     if (titleInput.value.trim() && categoryInput.value !== "0" && selectedImage) {
         const newWork = {
@@ -348,18 +347,20 @@ async function handleFormSubmit() {
             categoryId: parseInt(categoryInput.value),
             imageUrl: selectedImage,
         };
- 
+
         // Réinitialisation du formulaire
         titleInput.value = "";
         categoryInput.value = "0";
         fileInput.value = "";
-  
+        selectedImage = null; // Réinitialiser l'image sélectionnée
+
+        // Désactiver le bouton "valider"
         validerBtn.disabled = true;
         validerBtn.classList.remove("active");
- 
+
         // Fermeture de la modale
         modal.style.display = "none";
- 
+
         // Ajout du nouveau travail à la galerie
         const newWorkElement = `
             <figure data-id="${newWork.id}">
@@ -368,11 +369,34 @@ async function handleFormSubmit() {
             </figure>
         `;
         gallery.insertAdjacentHTML("beforeend", newWorkElement);
- 
+
         // Actualisation de la modal .select-modal
         await updateSelectModal(); // Appel de la fonction pour mettre à jour la modale
+
+        // Réinitialisation de l'upload d'image pour permettre une nouvelle sélection
+        resetImageUpload();
     } else {
         alert("Veuillez remplir tous les champs avant de valider !");
     }
- }
- 
+}
+// Réinitialiser l'upload pour permettre une nouvelle sélection
+function resetImageUpload() {
+    previewDiv.innerHTML = `
+       <div class="ajout-image">
+            <i class="fa-solid fa-image"></i>
+            <button id="btn-ajout-photo">+ Ajouter une photo</button>
+            <input type="file" id="fileInput" style="display: none;" accept="image/*">
+            <p class="info-image">jpg, png : 4mo max</p>
+        </div>
+    `;
+    selectedImage = null;
+    validateForm(); // Re-valider le formulaire (si nécessaire)
+
+    // Ajouter un événement pour ouvrir la boîte de dialogue de fichier quand on clique sur le bouton
+    document.getElementById("btn-ajout-photo").addEventListener("click", function() {
+        document.getElementById("fileInput").click(); // Simule le clic sur l'input type="file"
+    });
+
+    // Réattacher l'événement au nouvel input pour gérer l'upload de l'image
+    document.getElementById("fileInput").addEventListener("change", handleImageUpload);
+}
