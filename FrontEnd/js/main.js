@@ -37,21 +37,23 @@ function main() {
     checkAuth(); // Vérifie l'authentification
     displayModal(); // Affiche les travaux dans la modale
     setupEventListeners(); // Configure les écouteurs d'événements
+
 }
+// Lancement de l'application
+main();
 
 // Gestion des événements
-
 function setupEventListeners() {
-    // Gestion des modales
+ // click deconnexion
     document.addEventListener("click", (event) => {
+        const logout = document.querySelector(".logout");
         if (logout) {
             logout.addEventListener("click", (e) => {
                 e.preventDefault();
-                sessionStorage.removeItem("authToken");
-                checkAuth();
-                window.location.href = "index.html";
+                deconnecter();
             });
         }
+           // Gestion des modales
         if (event.target.closest(".edit")) {
             toggleModal("#modalgalrie");
         } else if (event.target.closest(".close-modal")) {
@@ -74,8 +76,6 @@ function setupEventListeners() {
     });
 
     // Gestion de l'ajout d'image
-    
-
     if (ajoutPhotoBtn && fileInput && titleInput && categoryInput && validerBtn) {
         ajoutPhotoBtn.addEventListener("click", () => {
             const modal = document.querySelector(".select-modal"); 
@@ -92,6 +92,15 @@ function setupEventListeners() {
     } else {
         console.error("Un ou plusieurs éléments du formulaire sont introuvables.");
     }
+}
+//deconnexion
+
+document.addEventListener("DOMContentLoaded", setupEventListeners);
+
+function deconnecter() {
+    sessionStorage.removeItem("authToken");
+    checkAuth();
+    window.location.href = "index.html";
 }
 
 // Fonction pour basculer entre les modales
@@ -154,7 +163,10 @@ async function getCategories() {
     });
 }
 
-// Affiche les travaux dans la modale
+/* ===========================
+    3. MODAL DE SÉLECTION
+=========================== */
+// Affichage des images dans la modale avec bouton de suppression
 async function displayModal() {
     const works = await fetchData(WORKS_URL);
     imgModal.innerHTML = works.map(work => `
@@ -166,24 +178,27 @@ async function displayModal() {
         </figure>
     `).join("");
 
+    // Ajout des événements pour les boutons de suppression
     imgModal.querySelectorAll(".delete").forEach(button => {
-        button.addEventListener("click", () => {
-            const workId = button.closest("figure").dataset.id;
-            removeImageFromGallery(workId);
-            button.closest("figure").remove();
-        });
+        button.addEventListener("click", deleteWork);
     });
 }
 
-// Supprime une image de la galerie
+
+// Supprime l'image de la galerie
 function removeImageFromGallery(workId) {
     const imageToRemove = gallery.querySelector(`[data-id="${workId}"]`);
-    if (imageToRemove) imageToRemove.remove();
+    if (imageToRemove) {
+        imageToRemove.remove();
+    }
+
+    // Supprime aussi l'image de la modale
+    const imageToRemoveFromModal = imgModal.querySelector(`[data-id="${workId}"]`);
+    if (imageToRemoveFromModal) {
+        imageToRemoveFromModal.remove();
+    }
 }
 
-/* ===========================
-    3. AUTHENTIFICATION
-=========================== */
 
 // Vérifie l'authentification
 function checkAuth() {
@@ -204,36 +219,89 @@ function checkAuth() {
     }
 }
 
-// Déconnexion
-document.addEventListener("DOMContentLoaded", () => {
-    const logout = document.querySelector(".logout");
-    if (logout) {
-        logout.addEventListener("click", (e) => {
-            e.preventDefault();
-            sessionStorage.removeItem("authToken");
-            checkAuth();
-            window.location.href = "index.html";
-        });
-    }
-});
 
 /* ===========================
     4. AJOUT D'IMAGES
 =========================== */
 
 // Gestion de l'upload d'image
+async function handleFormSubmit() {
+    if (titleInput.value.trim() && categoryInput.value !== "0" && selectedImage) {
+        const newWork = {
+            title: titleInput.value,
+            categoryId: parseInt(categoryInput.value),
+            imageUrl: selectedImage,
+        };
+
+        // Réinitialisation du formulaire
+        titleInput.value = "";
+        categoryInput.value = "0";
+        fileInput.value = ""; // Réinitialise le champ fileInput pour permettre une nouvelle sélection
+        previewDiv.innerHTML = ""; // Efface l'aperçu de l'image
+        selectedImage = null; // Réinitialise l'image sélectionnée
+        validerBtn.disabled = true; // Désactive le bouton de validation
+        validerBtn.classList.remove("active"); // Enlève la classe "active" du bouton de validation
+
+        // Fermeture de la modale
+        modal.style.display = "none";
+
+        // Ajout du nouveau travail à la galerie
+        const newWorkElement = `
+            <figure data-id="${newWork.id}">
+                <img src="${newWork.imageUrl}" alt="${newWork.title}">
+                <figcaption>${newWork.title}</figcaption>
+            </figure>
+        `;
+        gallery.insertAdjacentHTML("beforeend", newWorkElement);
+
+        // Actualisation de la modal .select-modal
+        await updateSelectModal();
+
+        // Réactive la validation du formulaire
+        validateForm();
+
+        // Réactive le bouton d'ajout d'image
+        ajoutPhotoBtn.style.display = "block"; // Assure que le bouton reste visible après validation
+
+    } else {
+        alert("Veuillez remplir tous les champs avant de valider !");
+    }
+}
+
+
+// Gestion de l'upload d'image et validation
 function handleImageUpload(event) {
     const file = event.target.files[0];
+    
+    // Vérifier si c'est une image valide
     if (file && file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            previewDiv.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-            selectedImage = e.target.result;
+            // Afficher l'image dans l'aperçu
+            previewDiv.innerHTML = `<img src="${e.target.result}" alt="Preview" class="image-preview">`;
+            selectedImage = e.target.result; // Sauvegarder l'image choisie
+
+            // Mettre à jour la validation du formulaire
             validateForm();
+
+            // Assurer que le bouton d'ajout d'image reste visible après un upload
+            ajoutPhotoBtn.style.display = "block"; 
+
+            // Réinitialiser le champ `fileInput` pour permettre une nouvelle sélection
+            fileInput.value = "";
         };
         reader.readAsDataURL(file);
+    } else {
+        // Si ce n'est pas une image valide, cacher l'aperçu et permettre une nouvelle sélection
+        previewDiv.style.display = "none";
+        selectedImage = null;
+        validateForm();
+
+        // Garder le bouton d'ajout visible
+        ajoutPhotoBtn.style.display = "block";
     }
 }
+
 
 // Validation du formulaire
 function validateForm() {
@@ -242,7 +310,10 @@ function validateForm() {
     validerBtn.classList.toggle("active", isFormValid);
 }
 
-// Soumission du formulaire
+
+
+
+// Soumission du formulaire et mise à jour de la galerie
 async function updateSelectModal() {
     const works = await fetchData(WORKS_URL);
     imgModal.innerHTML = works.map(work => `
@@ -262,45 +333,52 @@ async function updateSelectModal() {
         });
     });
 }
-async function handleFormSubmit() {
-    if (titleInput.value.trim() && categoryInput.value !== "0" && selectedImage) {
-        const newWork = {
-            title: titleInput.value,
-            categoryId: parseInt(categoryInput.value),
-            imageUrl: selectedImage,
-        };
 
-        // Réinitialisation du formulaire
-        titleInput.value = "";
-        categoryInput.value = "0";
-        fileInput.value = "";
-   
-        validerBtn.disabled = true;
-        validerBtn.classList.remove("active");
-
-        // Fermeture de la modale
-        modal.style.display = "none";
-
-        // Ajout du nouveau travail à la galerie
-        const newWorkElement = `
-            <figure data-id="${newWork.id}">
-                <img src="${newWork.imageUrl}" alt="${newWork.title}">
-                <figcaption>${newWork.title}</figcaption>
-            </figure>
-        `;
-        gallery.insertAdjacentHTML("beforeend", newWorkElement);
-
-        // Actualisation de la modal .select-modal
-        await updateSelectModal(); // Call the function to update the modal
-    } else {
-        alert("Veuillez remplir tous les champs avant de valider !");
-    }
-}
 /* ===========================
     5. FONCTIONS UTILITAIRES
 =========================== */
 
 
+
+
+// Fonction pour supprimer un travail de la galerie et de l'API
+async function deleteWork(event) {
+    const workId = event.target.closest("figure").dataset.id; // Récupérer l'ID de l'image à supprimer
+    if (!workId) {
+        alert("ID du travail introuvable !");
+        return;
+    }
+
+    if (!token) {
+        alert("Vous devez être connecté pour supprimer une image.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${WORKS_URL}/${workId}`, {
+            method: "DELETE",
+            headers: {
+                'Authorization': `Bearer ${token}`, // Envoi du token pour l'authentification
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            // Supprimer l'image du DOM après suppression réussie
+            removeImageFromGallery(workId);
+            updateSelectModal();  // Mise à jour de la modale des travaux
+        } else if (response.status === 401) {
+            alert("Vous devez être connecté pour effectuer cette action.");
+        } else if (response.status === 403) {
+            alert("Vous n'avez pas les droits pour supprimer cette image.");
+        } else {
+            alert("Une erreur est survenue lors de la suppression de l'image.");
+        }
+    } catch (error) {
+        console.error("Erreur lors de la suppression de l'image:", error);
+        alert("Une erreur s'est produite. Veuillez réessayer plus tard.");
+    }
+}
 // Fonction pour récupérer des données
 async function fetchData(url) {
     try {
@@ -312,6 +390,3 @@ async function fetchData(url) {
         return [];
     }
 }
-
-// Lancement de l'application
-main();
