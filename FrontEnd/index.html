@@ -10,10 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap"
         rel="stylesheet">
     <meta name="description" content="">
-    <link rel="stylesheet" href="./FrontEnd/assets/style.css">
+    <link rel="stylesheet" href="./assets/style.css">
 </head>
 
 <body>
+    <!-- Mode édition -->
     <div class="container-edition"> 
     <aside class="modif"><button class="edition"><i class="fa-solid fa-pen-to-square"></i></button>Mode édition</aside>
    
@@ -25,16 +26,17 @@
                 <li><a href="#portfolio">projets</a></li>
                 <li><a href="#contact">contact</a></li>
                 <li class="login"><a href="./login.html">login</a></li>
+                <!-- logout -->
                 <li class="logout"><a href="index.html">logout</a></li>
 
-                <li><img src="./FrontEnd/assets/icons/instagram.png" alt="Instagram"></li>
+                <li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
             </ul>
         </nav>
     </header>
     <main>
         <section id="introduction">
             <figure>
-                <img src="./FrontEnd/assets/images/sophie-bluel.png" alt="">
+                <img src="./assets/images/sophie-bluel.png" alt="">
             </figure>
             <article>
                 <h2>Designer d'espace </h2>
@@ -57,11 +59,12 @@
             </div>
         </section>
         <section class="fonction">
-            <!-- filtre -->
+            <!-- Bouttons filtre -->
         </section>
         <div class="gallery">
             <!-- figure -->
         </div>
+        <!-- Modal -->
         <aside id="modalgalrie" class="modal" style="display: none;">
             <div class="modal-wrapper">
                 <button class="close-modal"><i class="fa-solid fa-x"></i></button>
@@ -75,7 +78,7 @@
                     style="display: none;">
             </div>
         </aside>
-
+<!-- Modal pour ajouter des images -->
         <aside class="select-modal" style="display: none;">
             <div class="wrapper-select">
                 <div class="go-back"><i class="fa-solid fa-arrow-left"></i></div>
@@ -88,6 +91,7 @@
                     <input type="file" id="fileInput" style="display: none;" accept="image/*">
                      <p class="info-image">jpg, png : 4mo max</p>
                 </div>
+                <!-- Sélectiones categories des images -->
                 <div class="selection">
                     <label for="title">Titre</label>
                     <input type="text" id="title">
@@ -131,7 +135,7 @@
     </footer>
 
     <script src="https://kit.fontawesome.com/bd6d3f331e.js" crossorigin="anonymous"></script>
-    <script src="./FrontEnd/js/main.js"></script>
+    <script src="./js/main.js"></script>
 </body>
 
 </html>
