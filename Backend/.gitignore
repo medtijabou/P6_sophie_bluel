@@ -1,5 +1,3 @@
-.config/Code/Cache/
-node_modules/
-.cache/
-.npm/
+node_modules
+
 !images/.gitkeep
