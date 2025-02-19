@@ -21,6 +21,7 @@ const gallery = document.querySelector(".gallery");
 const filtersContainer = document.querySelector(".fonction");
 const modalgalrie = document.querySelector("#modalgalrie");
 const selectModal = document.querySelector(".select-modal");
+let selectedImage = null;
 // token
 const token = sessionStorage.getItem("authToken");
 const edit = document.querySelector(".edit");
@@ -258,15 +259,30 @@ document.addEventListener("DOMContentLoaded", () => {
 // Gestion de l'upload d'image
 function handleImageUpload(event) {
   const file = event.target.files[0];
-  if (file && file.type.startsWith("image/")) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      previewDiv.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-      selectedImage = e.target.result;
-      validateForm();
-    };
-    reader.readAsDataURL(file);
+
+  if (!file) {
+    alert("Veuillez sélectionner un fichier.");
+    return;
   }
+
+  if (!file.type.startsWith("image/")) {
+    alert("Veuillez sélectionner une image valide.");
+    return;
+  }
+
+  if (file.size > 4 * 1024 * 1024) {
+    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    alert(`L'image dépasse 4 Mo ! (${fileSizeMB} Mo)`);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewDiv.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+    selectedImage = e.target.result;
+    validateForm();
+  };
+  reader.readAsDataURL(file);
 }
 
 // Validation du formulaire
