@@ -7,7 +7,7 @@ const API_DElete = `http://localhost:5678/api/works/1`;
 // Éléments du DOM
 const editButtons = document.querySelectorAll(".edit");
 const closeModalButtons = document.querySelectorAll(
-  ".close-modal, .close-select, .go-back"
+  ".close-modal, .close-select, .go-back",
 );
 const ajoutPhotoBtn = document.querySelector("#btn-ajout-photo");
 const fileInput = document.querySelector("#fileInput");
@@ -136,7 +136,7 @@ function displayWorks(works) {
             <img src="${work.imageUrl}" alt="${work.title}">
             <figcaption>${work.title}</figcaption>
         </figure>
-    `
+    `,
     )
     .join("");
 }
@@ -150,7 +150,7 @@ async function getCategories() {
          .map(
            (category) => `
            <button data-id="${category.id}">${category.name}</button>
-       `
+       `,
          )
          .join("")}
    `;
@@ -178,7 +178,7 @@ async function displayModal() {
                 <i class="fa-solid fa-trash-can"></i>
             </button>
         </figure>
-    `
+    `,
     )
     .join("");
 
@@ -211,7 +211,7 @@ function removeImageFromGallery(workId) {
 
   // Supprime aussi l'image de la modale
   const imageToRemoveFromModal = imgModal.querySelector(
-    `[data-id="${workId}"]`
+    `[data-id="${workId}"]`,
   );
   if (imageToRemoveFromModal) {
     imageToRemoveFromModal.remove();
@@ -305,7 +305,7 @@ async function updateSelectModal() {
                <i class="fa-solid fa-trash-can"></i>
            </button>
        </figure>
-   `
+   `,
     )
     .join("");
 
@@ -351,7 +351,7 @@ async function deleteWork(workId) {
       const errorDetails = await response.json();
       console.error("Erreur de suppression", errorDetails);
       alert(
-        `Erreur lors de la suppression: ${errorDetails.message || "Erreur interne du serveur"}`
+        `Erreur lors de la suppression: ${errorDetails.message || "Erreur interne du serveur"}`,
       );
     }
   } catch (error) {
